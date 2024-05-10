@@ -1,0 +1,66 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "your_SSID";
+const char* password = "your_PW";
+
+// Liste der IP-Adressen
+const char* ipAdressen[] = {"192.168.0.111", "192.168.0.158", "192.168.0.50"};
+const int anzahlIPs = 3;
+
+// GPIOs für die Knöpfe definieren
+const int knopfPins[] = {2, 4, 5, 16, 18}; // Beispiel GPIOs
+const int anzahlKnopfe = 5;
+bool knopfZustand[anzahlKnopfe];
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Verbindung zum WLAN wird hergestellt...");
+  }
+
+  Serial.println("Mit WLAN verbunden");
+  
+  // Knöpfe als Eingänge definieren
+  for (int i = 0; i < anzahlKnopfe; i++) {
+    pinMode(knopfPins[i], INPUT_PULLUP);
+    knopfZustand[i] = HIGH;
+  }
+}
+
+void loop() {
+  for (int i = 0; i < anzahlKnopfe; i++) {
+    bool aktuellerZustand = digitalRead(knopfPins[i]);
+    if (aktuellerZustand == LOW && knopfZustand[i] == HIGH) {
+      // Knopf wurde gedrückt
+      sendeBefehl(i + 1);
+      knopfZustand[i] = LOW;
+    } else if (aktuellerZustand == HIGH && knopfZustand[i] == LOW) {
+      // Knopf wurde losgelassen
+      knopfZustand[i] = HIGH;
+    }
+  }
+}
+
+void sendeBefehl(int knopfNummer) {
+  for (int i = 0; i < anzahlIPs; i++) {
+    String befehl = "http://" + String(ipAdressen[i]) + "/win&PL=" + String(knopfNummer) + "\"";
+    Serial.println("Sende Befehl: " + befehl);
+    // HTTP-Anfrage senden
+    if(WiFi.status()== WL_CONNECTED){
+        HTTPClient http;
+        http.begin(befehl);
+        int httpCode = http.GET();
+        if(httpCode > 0) {
+            String payload = http.getString();
+            Serial.println(payload);
+        } else {
+            Serial.println("Error beim Senden des Befehls, HTTP-Code: " + String(httpCode));
+        }
+        http.end();
+    }
+  }
+}
