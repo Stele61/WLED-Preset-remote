@@ -1,5 +1,7 @@
 # WLED-Preset-remote
-I´ve needed a remote for a multi-esp WLED setup to trigger presets on all of the WLED-instances.
-So I´ve created (with the help of chatgpt^^) a script which can run on a seperate ESP32 with buttons attached, and triggeres presets on predefined IP´s via HTTP command.
+I needed a remote control solution for a multi-ESP WLED setup to activate presets across all instances. 
+With the assistance of ChatGPT, I developed a script that runs on a separate ESP32, allowing me to trigger presets on predefined IPs using HTTP commands. 
 
-It shure is not the most elegant way of doing it, but it works and might help somebody.
+While it may not be the most elegant solution, it gets the job done and could be useful for others facing a similar challenge.
+
+Just copy the code in the Arduino IDE, change the SSID, PW and target IP´s and flash it onto an ESP32.
